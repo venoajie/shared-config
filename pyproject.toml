@@ -25,10 +25,16 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "pydantic>=2.0",
-]
 
+dependencies = [
+    "pydantic==2.11.5",
+    "pydantic-core==2.33.2",
+    "pydantic-settings==2.3.0",
+    "tomli==2.0.1",
+    "loguru==0.7.2",
+    # --- ADDED: Declare the transitive dependency ---
+    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.1.5"
+]
 [project.urls]
 "Homepage" = "https://github.com/venoajie/shared-config"
 "Repository" = "https://github.com/venoajie/shared-config"
