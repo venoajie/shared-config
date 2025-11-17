@@ -33,7 +33,7 @@ dependencies = [
     "tomli==2.0.1",
     "loguru==0.7.2",
     # --- ADDED: Declare the transitive dependency ---
-    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.1.5"
+    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.2.0"
 ]
 [project.urls]
 "Homepage" = "https://github.com/venoajie/shared-config"
