@@ -1,0 +1,98 @@
+# pyproject.toml
+#
+# This file serves as the central configuration for the Python project,
+# using the setuptools build backend.
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# ANALYSIS: The package name is simplified to its canonical form.
+# The 'venoajie-' prefix was an attempt to work with the GitHub Packages
+# registry, which is no longer the target.
+name = "shared-config"
+version = "0.1.0"
+authors = [
+    { name = "Trading Systems Team", email = "ven.ajie@protonmail.com" },
+]
+description = ""
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/venoajie/shared-config"
+"Repository" = "https://github.com/venoajie/shared-config"
+
+# Specifies the directory where the package source code resides.
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Defines optional dependencies for development, testing, and releasing.
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "python-semantic-release>=9.0",
+    "build>=1.0",
+]
+
+# --- Tool Configurations ---
+
+# Configuration for python-semantic-release.
+[tool.semantic_release]
+version_variables = ["pyproject.toml:project.version"]
+build_command = "pip install build && python -m build"
+commit_parser = "conventional"
+changelog_file = "CHANGELOG.md"
+branch = "main"
+# ANALYSIS: This is the critical change. 'upload_to_repository' is set to false.
+# This instructs semantic-release to NOT run 'twine upload', preventing any
+# interaction with a package registry.
+upload_to_repository = false
+# ANALYSIS: This is kept as true. It ensures the built wheel and tar.gz files
+# are attached to the GitHub Release page, which is a best practice.
+upload_to_release = true
+# ANALYSIS: The 'repository_url' key is removed entirely, as it is no longer
+# relevant without uploading to a repository.
+major_on_zero = true
+
+
+# Configuration for the Ruff linter and formatter.
+[tool.ruff]
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+# Configuration for Pytest.
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=term-missing"
+testpaths = [
+    "tests",
+]

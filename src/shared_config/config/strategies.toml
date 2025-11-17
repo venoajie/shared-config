@@ -1,0 +1,329 @@
+# src\shared\config\strategies.toml
+
+
+# This file defines the core business logic, parameters, and runtime configuration
+# for the application's services. It is loaded once on startup by each service.
+
+# -----------------------------------------------------------------------------
+# SERVICE: RECEIVER
+# This section configures the real-time data ingestion clients.
+# Each [[market_definitions]] entry launches a dedicated, persistent WebSocket
+# client within the 'receiver' service.
+# -----------------------------------------------------------------------------
+[[market_definitions]]
+# A unique identifier for this client instance. Used for logging and control.
+market_id = "deribit_inverse"
+# The exchange name. Must match a client implementation in `receiver/main.py`
+# and an exchange configuration section in the .env file.
+exchange = "deribit"
+# The type of market this client will connect to (e.g., 'inverse', 'spot').
+# This is used by the client to select the correct instruments and data streams.
+market_type = "inverse"
+mode = "full"
+
+[[market_definitions]]
+market_id = "binance_spot"
+exchange = "binance"
+market_type = "spot"
+mode = "full"
+
+# -----------------------------------------------------------------------------
+# SERVICE: EXECUTOR
+# This section defines the parameters for the trading strategy engine, likely
+# consumed by the 'executor' service.
+# -----------------------------------------------------------------------------
+
+# A list of all available strategy labels that can be assigned to orders.
+strategy_labels = [
+    "hedgingSpot",
+    "futureSpread",
+    "comboAuto",
+    "scalping",
+    "custom",
+]
+mode_full = [true]
+reduce_only = [false]
+
+# Defines the symbols that the 'binance' receiver client will initially
+# subscribe to for public trade data upon startup.
+public_trade_symbols = [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "BNBUSDT"
+]
+
+# -----------------------------------------------------------------------------
+# SERVICE: DISTRIBUTOR & MAINTENANCE
+# Configuration for automated data pruning scripts.
+# -----------------------------------------------------------------------------
+
+[distributor]
+# How long to keep data in the public_trades table.
+# The value MUST be a string that PostgreSQL can parse as an INTERVAL.
+# Examples: "1 hour", "7 days", "1 day 12 hours"
+public_trades_retention_period = "1 hour"
+# How often the pruning task should run within the 'distributor' service.
+pruning_interval_s = 600 # 10 minutes
+
+[maintenance]
+# Defines the retention period for the manual maintenance script.
+public_trades_retention_period = "24 hours" # A string that PostgreSQL can parse as an INTERVAL
+
+# -----------------------------------------------------------------------------
+# SERVICE: ANALYZER
+# Configures the real-time market data anomaly detection service.
+# -----------------------------------------------------------------------------
+[analyzer]
+# General service settings for the Redis stream consumer.
+consumer_name = "analyzer-1"
+group_name = "analyzer_group"
+# How often the service re-syncs the full instrument list from the database.
+instrument_sync_interval_s = 3600
+# The main loop interval for checking for anomalies.
+anomaly_check_interval_s = 15
+
+# Anomaly detection parameters.
+# Compares volume over a recent, short window...
+volume_window_recent_s = 60
+# ...to volume over a longer, historical window.
+volume_window_historical_s = 3600
+# The multiplier to apply to the historical average to set the anomaly threshold.
+anomaly_threshold_multiplier = 5.0
+# How long to wait before sending another alert for the same instrument.
+alert_cooldown_s = 300
+
+# List of symbols to explicitly ignore during anomaly checks (e.g., stablecoins).
+blacklist = [
+    "FDUSDUSDT",
+    "TUSDUSDT",
+    "USDCUSDT"
+]
+
+[[tradable]]
+spot = [
+    "BTC",
+    "ETH",
+]
+
+# -----------------------------------------------------------------------------
+# SERVICE: JANITOR & BACKFILL
+# Configures historical data fetching tasks, primarily run by the 'janitor'
+# on startup and the 'backfill' service for ongoing work.
+# -----------------------------------------------------------------------------
+[backfill]
+start_date = "2025-07-01" #YYYY-MM-DD
+# The OHLC timeframes to manage.
+resolutions = ["1", "5", "15", "60", "1D"]
+# When bootstrapping a new instrument, this is the target number of candles to fetch.
+bootstrap_target_candles = 6000
+# The number of concurrent workers in the 'backfill' service processing the Redis queue.
+worker_count = 4
+# A specific list of instruments to check for OHLC backfilling.
+# The 'janitor' uses this list to discover and queue work.
+ohlc_backfill_whitelist = [
+    "BTC-PERPETUAL",
+    "ETH-PERPETUAL",
+    "BTCUSDT",
+    "ETHUSDT"
+]
+
+# Dedicated configuration for historical public trade backfilling.
+[backfill.public_trades]
+# A master switch to enable or disable this feature in the 'janitor' service.
+enabled = false
+# How far back to fetch data for a new instrument.
+lookback_days = 7
+# A specific list of instruments to backfill with public trade data.
+whitelist = [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+]
+
+# -----------------------------------------------------------------------------
+# MISCELLANEOUS & STRATEGY-SPECIFIC
+# -----------------------------------------------------------------------------
+[realtime]
+# The Redis channel used by the 'binance' receiver to dynamically manage subscriptions.
+binance_subscription_control_channel = "control:binance:subscriptions"
+
+[[public_symbols]]
+symbol = "BTCUSDT"
+market_type = "spot"
+
+[[all_instruments]]
+max_orders = 50
+
+# Defines risk parameters for the 'executor' based on a perceived market state.
+[[market_situation]]
+market_situation = "STRONG_BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "WEAK_BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "NEUTRAL"
+hedging_ratio = 80
+sec_cool_down = 60
+sec_outstanding = 300
+max_order = 1
+pct_order = 5
+
+[[market_situation]]
+market_situation = "WEAK_BEARISH"
+hedging_ratio = 100
+sec_cool_down = 60
+sec_outstanding = 180
+max_order = 1
+pct_order = 10
+
+[[market_situation]]
+market_situation = "BEARISH"
+hedging_ratio = 120
+sec_cool_down = 30
+sec_outstanding = 60
+max_order = 2
+pct_order = 10
+
+[[market_situation]]
+market_situation = "STRONG_BEARISH"
+hedging_ratio = 150
+sec_cool_down = 30
+sec_outstanding = 30
+max_order = 3
+pct_order = 20
+
+# Defines the detailed parameters for a specific trading strategy label.
+# These are consumed by the 'executor' service.
+[[strategies]]
+strategy_label = "hedgingSpot"
+is_active = true
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = false
+side = "sell"
+take_profit_pct = 0
+settlement_period = ["perpetual", "week"]
+weighted_factor = {minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+sec_cool_down= 240
+max_leverage= 1
+max_margin_utilization_pct = 0.80 # Or another value between 0.0 and 1.0
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= true
+reduce_only= false
+
+[[strategies]]
+strategy_label = "scalping"
+is_active = false
+contribute_to_hedging = false
+cancellable = true
+non_checked_for_size_label_consistency = false
+side = "sell"
+take_profit_pct = 0
+settlement_period = ["perpetual", "week"]
+weighted_factor = {minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+sec_cool_down= 240
+max_leverage= 1
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= true
+reduce_only= false
+
+[[strategies]]
+strategy_label = "futureSpread"
+is_active = true
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+delta_price_pct= 0.1
+monthly_profit_pct= 0.5
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= false
+reduce_only= true
+
+[[strategies]]
+strategy_label = "futureSpreadAuto"
+is_active = false
+contribute_to_hedging = true
+cancellable = false
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 10
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+delta_price_pct= 0.1
+monthly_profit_pct= 0.5
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= false
+reduce_only= true
+
+[[strategies]]
+strategy_label = "comboAuto"
+is_active = false
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+monthly_profit_pct= 0.5
+delta_price_pct= 0.1
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+
+[[strategies]]
+strategy_label = "custom"
+is_active = false
+contribute_to_hedging = false
+cancellable = false
+non_checked_for_size_label_consistency = true
+side = []
+take_profit_pct = 0
+settlement_period = ["perpetual", "week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = []
+sec_cool_down= 240
+max_leverage= 1
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+
+[[strategies.general]]
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
