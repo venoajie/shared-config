@@ -1,5 +1,5 @@
 
-# src/shared_utils/config/config.py
+# src\shared_config\config.py
 
 """
 Primary configuration loader. SINGLE SOURCE OF TRUTH.
@@ -13,7 +13,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from loguru import logger as log
 from pathlib import Path
 
-# --- CORRECTED IMPORT ---
 # MarketDefinition is a core data contract and must be imported from the appropriate shared library.
 from trading_engine_core.models import MarketDefinition
 
@@ -37,7 +36,6 @@ class ExchangeSettings(BaseModel):
     account_id: Optional[str] = None
     ws_url: Optional[str] = None
     rest_url: Optional[str] = None
-    # --- MODIFIED: Add fields for API keys ---
     client_id: Optional[str] = None
     client_secret: Optional[str] = None
     model_config = ConfigDict(extra="allow")
@@ -250,7 +248,7 @@ def load_settings() -> AppSettings:
         **toml_data,
     }
 
-    # --- MODIFIED: Use the helper function for Postgres password ---
+    # --- Use the helper function for Postgres password ---
     pg_password = read_secret(raw_env.POSTGRES_PASSWORD, raw_env.POSTGRES_PASSWORD_FILE)
     services_requiring_db = ["distributor", "executor", "janitor", "receiver", "analyzer", "backfill"]
     if raw_env.SERVICE_NAME in services_requiring_db:
@@ -264,7 +262,7 @@ def load_settings() -> AppSettings:
             "db": raw_env.POSTGRES_DB,
         }
 
-    # --- ADDED: Conditional logic to load OCI settings for the executor ---
+    # --- Conditional logic to load OCI settings for the executor ---
     if raw_env.SERVICE_NAME == "executor":
         oci_dsn = read_secret(None, raw_env.OCI_DSN_FILE)
         oci_wallet_dir = raw_env.OCI_WALLET_DIR

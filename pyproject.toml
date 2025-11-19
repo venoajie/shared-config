@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 # The 'venoajie-' prefix was an attempt to work with the GitHub Packages
 # registry, which is no longer the target.
 name = "shared-config"
-version = "0.1.3"
+version = "0.1.4"
 authors = [
     { name = "Trading Systems Team", email = "ven.ajie@protonmail.com" },
 ]
@@ -60,15 +60,10 @@ build_command = "pip install build && python -m build"
 commit_parser = "conventional"
 changelog_file = "CHANGELOG.md"
 branch = "main"
-# ANALYSIS: This is the critical change. 'upload_to_repository' is set to false.
-# This instructs semantic-release to NOT run 'twine upload', preventing any
-# interaction with a package registry.
 upload_to_repository = false
 # ANALYSIS: This is kept as true. It ensures the built wheel and tar.gz files
 # are attached to the GitHub Release page, which is a best practice.
 upload_to_release = true
-# ANALYSIS: The 'repository_url' key is removed entirely, as it is no longer
-# relevant without uploading to a repository.
 major_on_zero = true
 
 
