@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 # The 'venoajie-' prefix was an attempt to work with the GitHub Packages
 # registry, which is no longer the target.
 name = "shared-config"
-version = "0.1.2"
+version = "0.1.3"
 authors = [
     { name = "Trading Systems Team", email = "ven.ajie@protonmail.com" },
 ]
@@ -32,7 +32,7 @@ dependencies = [
     "pydantic-settings==2.3.0",
     "tomli==2.0.1",
     "loguru==0.7.2",
-    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.2.1"
+    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.2.2"
 ]
 [project.urls]
 "Homepage" = "https://github.com/venoajie/shared-config"
