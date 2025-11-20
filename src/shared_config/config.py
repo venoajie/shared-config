@@ -244,10 +244,11 @@ def load_settings() -> AppSettings:
             "url": raw_env.REDIS_URL,
             "db": raw_env.REDIS_DB,
             "password": raw_env.REDIS_PASSWORD,
-        },
+        },        
+        "analyzer": {}, # Force creation with defaults
         **toml_data,
     }
-
+   
     # --- Use the helper function for Postgres password ---
     pg_password = read_secret(raw_env.POSTGRES_PASSWORD, raw_env.POSTGRES_PASSWORD_FILE)
     services_requiring_db = ["distributor", "executor", "janitor", "receiver", "analyzer", "backfill"]
