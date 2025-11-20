@@ -31,8 +31,11 @@ dependencies = [
     "pydantic-core==2.33.2",
     "pydantic-settings==2.3.0",
     "tomli==2.0.1",
-    "loguru==0.7.2",
+    "loguru==0.7.2",    
+    "trading-engine-core @ git+https://github.com/venoajie/trading-engine-core.git@v0.1.0",
+
 ]
+
 [project.urls]
 "Homepage" = "https://github.com/venoajie/shared-config"
 "Repository" = "https://github.com/venoajie/shared-config"
