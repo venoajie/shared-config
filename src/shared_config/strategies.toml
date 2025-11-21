@@ -68,7 +68,10 @@ pruning_interval_s = 600 # 10 minutes
 
 [maintenance]
 # Defines the retention period for the manual maintenance script.
-public_trades_retention_period = "24 hours" # A string that PostgreSQL can parse as an INTERVAL
+#public_trades_retention_period = "24 hours" # A string that PostgreSQL can parse as an INTERVAL
+
+# NEW: Aggressive pruning for dev
+public_trades_retention_period = "1 hour" 
 
 # -----------------------------------------------------------------------------
 # SERVICE: ANALYZER
