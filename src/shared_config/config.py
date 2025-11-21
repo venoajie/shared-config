@@ -179,7 +179,7 @@ class AppSettings(BaseModel):
 class RawEnvSettings(BaseSettings):
     SERVICE_NAME: str = "unknown"
     ENVIRONMENT: str = "development"
-    STRATEGY_CONFIG_PATH: str = "/app/src/shared/config/strategies.toml"
+    STRATEGY_CONFIG_PATH: str = str(Path(__file__).parent / "strategies.toml")    
     REDIS_URL: str = "redis://localhost:6379"
     REDIS_DB: int = 0
     REDIS_PASSWORD: Optional[str] = None

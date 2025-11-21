@@ -44,6 +44,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+shared_config = ["*.toml"]
+
 # Defines optional dependencies for development, testing, and releasing.
 [project.optional-dependencies]
 dev = [
