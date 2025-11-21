@@ -91,6 +91,8 @@ class RedisSettings(BaseModel):
 
 # --- ADDED: Model for OCI Database Settings ---
 class OCISettings(BaseModel):
+    user: str
+    password: str
     dsn: str
     wallet_dir: str
 
@@ -192,6 +194,8 @@ class RawEnvSettings(BaseSettings):
     DERIBIT_CLIENT_ID_FILE: Optional[str] = None
     DERIBIT_CLIENT_SECRET_FILE: Optional[str] = None
     OCI_DSN_FILE: Optional[str] = None
+    OCI_USER_FILE: Optional[str] = None
+    OCI_PASSWORD_FILE: Optional[str] = None
     OCI_WALLET_DIR: Optional[str] = None
 
     model_config = SettingsConfigDict(
