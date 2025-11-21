@@ -64,6 +64,7 @@ class OciConfig(BaseModel):
 
 class MaintenanceSettings(BaseModel):
     public_trades_retention_period: str = "24 hours"
+    pruning_interval_s: int = 86400 # Default to 24 hours
 
 
 class DistributorSettings(BaseModel):
