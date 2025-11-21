@@ -209,7 +209,7 @@ def load_settings() -> AppSettings:
     log.info("Loading application configuration...")
     raw_env = RawEnvSettings()
     
-    # --- MODIFIED: Logic to handle exchange API keys from files ---
+    # --- Logic to handle exchange API keys from files ---
     exchanges_data = {}
     for key, value in os.environ.items():
         key = key.lower()
@@ -234,7 +234,7 @@ def load_settings() -> AppSettings:
     try:
         with open(raw_env.STRATEGY_CONFIG_PATH, "rb") as f:
             toml_data = tomli.load(f)
-        log.info(f"Successfully loaded strategy config from {raw_env.STRATEGIES_CONFIG_PATH}")
+        log.info(f"Successfully loaded strategy config from {raw_env.STRATEGY_CONFIG_PATH}")
     except (FileNotFoundError, AttributeError):
         log.warning(f"Strategy config file not found at {raw_env.STRATEGY_CONFIG_PATH}. Skipping.")
 
@@ -267,19 +267,25 @@ def load_settings() -> AppSettings:
             "db": raw_env.POSTGRES_DB,
         }
 
-    # --- Conditional logic to load OCI settings for the executor ---
+    # --- CORRECTED: Conditional logic to load OCI settings for the executor ---
     if raw_env.SERVICE_NAME == "executor":
         oci_dsn = read_secret(None, raw_env.OCI_DSN_FILE)
+        oci_user = read_secret(None, raw_env.OCI_USER_FILE)
+        oci_password = read_secret(None, raw_env.OCI_PASSWORD_FILE)
         oci_wallet_dir = raw_env.OCI_WALLET_DIR
-        if oci_dsn and oci_wallet_dir:
+        if all([oci_dsn, oci_user, oci_password, oci_wallet_dir]):
             log.info("Loading OCI database configuration for executor service.")
-            final_data["oci"] = OCISettings(dsn=oci_dsn, wallet_dir=oci_wallet_dir)
+            final_data["oci"] = OCISettings(
+                dsn=oci_dsn,
+                user=oci_user,
+                password=oci_password,
+                wallet_dir=oci_wallet_dir
+            )
         else:
-            raise ValueError("Executor service requires OCI_DSN_FILE and OCI_WALLET_DIR to be set.")
+            raise ValueError("Executor service requires OCI_DSN_FILE, OCI_USER_FILE, OCI_PASSWORD_FILE, and OCI_WALLET_DIR.")
 
     final_settings = AppSettings.model_validate(final_data)
     log.info(f"Configuration loaded for service '{final_settings.service_name}' in '{final_settings.environment}' environment.")
     return final_settings
-
 
 settings = load_settings()
