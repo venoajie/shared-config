@@ -18,7 +18,7 @@ market_id = "deribit_inverse"
 exchange = "deribit"
 # The type of market this client will connect to (e.g., 'inverse', 'spot').
 # This is used by the client to select the correct instruments and data streams.
-market_type = "inverse"
+market_type = "futures"
 mode = "full"
 
 [[market_definitions]]
