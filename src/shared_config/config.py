@@ -256,7 +256,7 @@ def load_settings() -> AppSettings:
    
     # --- Use the helper function for Postgres password ---
     pg_password = read_secret(raw_env.POSTGRES_PASSWORD, raw_env.POSTGRES_PASSWORD_FILE)
-    services_requiring_db = ["distributor", "executor", "janitor", "receiver", "analyzer", "backfill"]
+    services_requiring_db = ["distributor", "executor", "janitor", "receiver", "analyzer", "backfill", "maintenance"]
     if raw_env.SERVICE_NAME in services_requiring_db:
         if not pg_password:
             raise ValueError(f"PostgreSQL password could not be loaded for service '{raw_env.SERVICE_NAME}'.")
@@ -268,7 +268,7 @@ def load_settings() -> AppSettings:
             "db": raw_env.POSTGRES_DB,
         }
 
-    # --- CORRECTED: Conditional logic to load OCI settings for the executor ---
+    # --- Conditional logic to load OCI settings for the executor ---
     if raw_env.SERVICE_NAME == "executor":
         oci_dsn = read_secret(None, raw_env.OCI_DSN_FILE)
         oci_user = read_secret(None, raw_env.OCI_USER_FILE)
