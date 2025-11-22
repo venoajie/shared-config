@@ -1,24 +1,25 @@
-
-# src\shared_config\config.py
+# src/shared_config/config.py
 
 """
 Primary configuration loader. SINGLE SOURCE OF TRUTH.
 This module provides a singleton `settings` object that is populated once on startup.
 """
+
 import os
-import tomli
-from typing import Dict, Any, Optional, List, Union
-from pydantic import BaseModel, Field, model_validator, ConfigDict, computed_field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from loguru import logger as log
 from pathlib import Path
+from typing import Any
+
+import tomli
+from loguru import logger as log
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # MarketDefinition is a core data contract and must be imported from the appropriate shared library.
 from trading_engine_core.models import MarketDefinition
 
 
 # --- Helper Function for reading secrets --- ADDED
-def read_secret(value: Optional[str], file_path: Optional[str]) -> Optional[str]:
+def read_secret(value: str | None, file_path: str | None) -> str | None:
     """
     Reads a secret, prioritizing the file path if provided and valid.
     Falls back to the direct value.
@@ -33,38 +34,39 @@ def read_secret(value: Optional[str], file_path: Optional[str]) -> Optional[str]
 
 
 class ExchangeSettings(BaseModel):
-    account_id: Optional[str] = None
-    ws_url: Optional[str] = None
-    rest_url: Optional[str] = None
-    client_id: Optional[str] = None
-    client_secret: Optional[str] = None
+    account_id: str | None = None
+    ws_url: str | None = None
+    rest_url: str | None = None
+    client_id: str | None = None
+    client_secret: str | None = None
     model_config = ConfigDict(extra="allow")
+
 
 class OciConfig(BaseModel):
     dsn: str
     wallet_dir: str
-    
-    @model_validator(mode='after')
-    def parse_tns_alias(self) -> 'OciConfig':
+
+    @model_validator(mode="after")
+    def parse_tns_alias(self) -> "OciConfig":
         """
         Parses the TNS alias from a full Oracle connection string.
         Input format example: oracle+oracledb://user:pass@alias_name?param=value
         Target output: alias_name
         """
         # 1. Isolate the part after credentials (after the last '@')
-        if '@' in self.dsn:
-            self.dsn = self.dsn.split('@')[-1]
-            
+        if "@" in self.dsn:
+            self.dsn = self.dsn.split("@")[-1]
+
         # 2. Remove any query parameters (after the first '?')
-        if '?' in self.dsn:
-            self.dsn = self.dsn.split('?')[0]
-            
+        if "?" in self.dsn:
+            self.dsn = self.dsn.split("?")[0]
+
         return self
 
 
 class MaintenanceSettings(BaseModel):
     public_trades_retention_period: str = "24 hours"
-    pruning_interval_s: int = 86400 # Default to 24 hours
+    pruning_interval_s: int = 86400  # Default to 24 hours
 
 
 class DistributorSettings(BaseModel):
@@ -87,7 +89,7 @@ class PostgresSettings(BaseModel):
 class RedisSettings(BaseModel):
     url: str
     db: int
-    password: Optional[str] = None
+    password: str | None = None
 
 
 # --- ADDED: Model for OCI Database Settings ---
@@ -107,55 +109,58 @@ class AnalyzerSettings(BaseModel):
     volume_window_historical_s: int = 3600
     anomaly_threshold_multiplier: float = 5.0
     alert_cooldown_s: int = 300
-    blacklist: List[str] = Field(default_factory=list)
+    blacklist: list[str] = Field(default_factory=list)
 
 
 class PublicTradesBackfillSettings(BaseModel):
     enabled: bool = False
     lookback_days: int = 7
-    whitelist: List[str] = Field(default_factory=list)
+    whitelist: list[str] = Field(default_factory=list)
 
 
 class BackfillSettings(BaseModel):
     start_date: str = "2025-07-01"
-    resolutions: List[Union[int, str]] = Field(default_factory=lambda: ["1", "5", "15", "60", "1D"])
+    resolutions: list[int | str] = Field(default_factory=lambda: ["1", "5", "15", "60", "1D"])
     bootstrap_target_candles: int = 6000
     worker_count: int = 4
-    ohlc_backfill_whitelist: List[str] = Field(default_factory=list)
-    public_trades: Optional[PublicTradesBackfillSettings] = None
+    ohlc_backfill_whitelist: list[str] = Field(default_factory=list)
+    public_trades: PublicTradesBackfillSettings | None = None
 
 
 class AppSettings(BaseModel):
     service_name: str
     environment: str
     strategy_config_path: str
-    exchanges: Dict[str, ExchangeSettings] = Field(default_factory=dict)
-    market_definitions: List[MarketDefinition] = Field(default_factory=list)
+    exchanges: dict[str, ExchangeSettings] = Field(default_factory=dict)
+    market_definitions: list[MarketDefinition] = Field(default_factory=list)
     redis: RedisSettings
-    postgres: Optional[PostgresSettings] = None
+    postgres: PostgresSettings | None = None
     # --- ADDED: Field for OCI settings ---
-    oci: Optional[OCISettings] = None
-    analyzer: Optional[AnalyzerSettings] = None
-    tradable: List[Dict] = []
-    strategies: List[Dict] = []
-    all_instruments: List[Dict] = Field(default_factory=list)
-    hedged_currencies: List[str] = []
-    market_situation: List[Dict] = []
-    strategy_map: Dict[str, Any] = Field(default_factory=dict, exclude=True)
-    realtime: Dict[str, Any] = Field(default_factory=dict)
-    backfill: Optional[BackfillSettings] = None
-    public_symbols: List[Dict[str, str]] = Field(default_factory=list)
-    maintenance: Optional[MaintenanceSettings] = None
-    distributor: Optional[DistributorSettings] = None
+    oci: OCISettings | None = None
+    analyzer: AnalyzerSettings | None = None
+    tradable: list[dict] = []
+    strategies: list[dict] = []
+    all_instruments: list[dict] = Field(default_factory=list)
+    hedged_currencies: list[str] = []
+    market_situation: list[dict] = []
+    strategy_map: dict[str, Any] = Field(default_factory=dict, exclude=True)
+    realtime: dict[str, Any] = Field(default_factory=dict)
+    backfill: BackfillSettings | None = None
+    public_symbols: list[dict[str, str]] = Field(default_factory=list)
+    maintenance: MaintenanceSettings | None = None
+    distributor: DistributorSettings | None = None
 
     @computed_field
     @property
-    def market_map(self) -> Dict[str, MarketDefinition]:
+    def market_map(self) -> dict[str, MarketDefinition]:
         hydrated_market_map = {}
         for md in self.market_definitions:
             exchange_config = self.exchanges.get(md.exchange)
             if not exchange_config:
-                log.warning(f"Config Warning: Market '{md.market_id}' specifies exchange '{md.exchange}', but no connection details found. Skipping.")
+                log.warning(
+                    f"Config Warning: Market '{md.market_id}' specifies exchange '{md.exchange}', "
+                    "but no connection details found. Skipping."
+                )
                 continue
             md.ws_base_url = exchange_config.ws_url
             md.rest_base_url = exchange_config.rest_url
@@ -170,7 +175,8 @@ class AppSettings(BaseModel):
         if self.tradable:
             for tradable_item in self.tradable:
                 derived_hedged_currencies.extend(tradable_item.get("spot", []))
-        self.hedged_currencies = sorted(list(set(derived_hedged_currencies)))
+        # FIXED C414: Removed unnecessary list() call
+        self.hedged_currencies = sorted(set(derived_hedged_currencies))
         self.strategy_map = {s.get("strategy_label"): s for s in self.strategies}
         if self.strategy_map:
             log.info(f"Built strategy map for labels: {list(self.strategy_map.keys())}")
@@ -180,24 +186,24 @@ class AppSettings(BaseModel):
 class RawEnvSettings(BaseSettings):
     SERVICE_NAME: str = "unknown"
     ENVIRONMENT: str = "development"
-    STRATEGY_CONFIG_PATH: str = str(Path(__file__).parent / "strategies.toml")    
+    STRATEGY_CONFIG_PATH: str = str(Path(__file__).parent / "strategies.toml")
     REDIS_URL: str = "redis://localhost:6379"
     REDIS_DB: int = 0
-    REDIS_PASSWORD: Optional[str] = None
+    REDIS_PASSWORD: str | None = None
     POSTGRES_USER: str = "trading_app"
-    POSTGRES_PASSWORD: Optional[str] = None
-    POSTGRES_PASSWORD_FILE: Optional[str] = None
+    POSTGRES_PASSWORD: str | None = None
+    POSTGRES_PASSWORD_FILE: str | None = None
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "trading"
 
     # --- ADDED: Fields for Deribit and OCI file-based secrets ---
-    DERIBIT_CLIENT_ID_FILE: Optional[str] = None
-    DERIBIT_CLIENT_SECRET_FILE: Optional[str] = None
-    OCI_DSN_FILE: Optional[str] = None
-    OCI_USER_FILE: Optional[str] = None
-    OCI_PASSWORD_FILE: Optional[str] = None
-    OCI_WALLET_DIR: Optional[str] = None
+    DERIBIT_CLIENT_ID_FILE: str | None = None
+    DERIBIT_CLIENT_SECRET_FILE: str | None = None
+    OCI_DSN_FILE: str | None = None
+    OCI_USER_FILE: str | None = None
+    OCI_PASSWORD_FILE: str | None = None
+    OCI_WALLET_DIR: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -209,7 +215,7 @@ class RawEnvSettings(BaseSettings):
 def load_settings() -> AppSettings:
     log.info("Loading application configuration...")
     raw_env = RawEnvSettings()
-    
+
     # --- Logic to handle exchange API keys from files ---
     exchanges_data = {}
     for key, value in os.environ.items():
@@ -225,7 +231,9 @@ def load_settings() -> AppSettings:
     # Override with file-based secrets if available for Deribit
     if "deribit" in exchanges_data:
         deribit_client_id = read_secret(exchanges_data["deribit"].get("client_id"), raw_env.DERIBIT_CLIENT_ID_FILE)
-        deribit_client_secret = read_secret(exchanges_data["deribit"].get("client_secret"), raw_env.DERIBIT_CLIENT_SECRET_FILE)
+        deribit_client_secret = read_secret(
+            exchanges_data["deribit"].get("client_secret"), raw_env.DERIBIT_CLIENT_SECRET_FILE
+        )
         if deribit_client_id:
             exchanges_data["deribit"]["client_id"] = deribit_client_id
         if deribit_client_secret:
@@ -239,7 +247,6 @@ def load_settings() -> AppSettings:
     except (FileNotFoundError, AttributeError):
         log.warning(f"Strategy config file not found at {raw_env.STRATEGY_CONFIG_PATH}. Skipping.")
 
-
     final_data = {
         "service_name": raw_env.SERVICE_NAME,
         "environment": raw_env.ENVIRONMENT,
@@ -249,11 +256,11 @@ def load_settings() -> AppSettings:
             "url": raw_env.REDIS_URL,
             "db": raw_env.REDIS_DB,
             "password": raw_env.REDIS_PASSWORD,
-        },        
-        "analyzer": {}, # Force creation with defaults
+        },
+        "analyzer": {},  # Force creation with defaults
         **toml_data,
     }
-   
+
     # --- Use the helper function for Postgres password ---
     pg_password = read_secret(raw_env.POSTGRES_PASSWORD, raw_env.POSTGRES_PASSWORD_FILE)
     services_requiring_db = ["distributor", "executor", "janitor", "receiver", "analyzer", "backfill", "maintenance"]
@@ -277,16 +284,16 @@ def load_settings() -> AppSettings:
         if all([oci_dsn, oci_user, oci_password, oci_wallet_dir]):
             log.info("Loading OCI database configuration for executor service.")
             final_data["oci"] = OCISettings(
-                dsn=oci_dsn,
-                user=oci_user,
-                password=oci_password,
-                wallet_dir=oci_wallet_dir
+                dsn=oci_dsn, user=oci_user, password=oci_password, wallet_dir=oci_wallet_dir
             )
         else:
-            raise ValueError("Executor service requires OCI_DSN_FILE, OCI_USER_FILE, OCI_PASSWORD_FILE, and OCI_WALLET_DIR.")
+            raise ValueError(
+                "Executor service requires OCI_DSN_FILE, OCI_USER_FILE, OCI_PASSWORD_FILE, and OCI_WALLET_DIR."
+            )
 
     final_settings = AppSettings.model_validate(final_data)
-    log.info(f"Configuration loaded for service '{final_settings.service_name}' in '{final_settings.environment}' environment.")
+    log.info(
+        f"Configuration loaded for service '{final_settings.service_name}' "
+        f"in '{final_settings.environment}' environment."
+    )
     return final_settings
-
-settings = load_settings()

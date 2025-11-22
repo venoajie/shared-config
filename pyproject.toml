@@ -61,7 +61,7 @@ dev = [
 
 # Configuration for python-semantic-release.
 [tool.semantic_release]
-version_variables = ["pyproject.toml:project.version"]
+version_toml = ["pyproject.toml:project.version"]
 build_command = "pip install build && python -m build"
 commit_parser = "conventional"
 changelog_file = "CHANGELOG.md"
@@ -75,7 +75,7 @@ major_on_zero = true
 
 # Configuration for the Ruff linter and formatter.
 [tool.ruff]
-line-length = 88
+line-length = 120
 src = ["src"]
 
 [tool.ruff.lint]
