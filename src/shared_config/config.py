@@ -92,7 +92,6 @@ class RedisSettings(BaseModel):
     password: str | None = None
 
 
-# --- ADDED: Model for OCI Database Settings ---
 class OCISettings(BaseModel):
     user: str
     password: str
@@ -135,7 +134,6 @@ class AppSettings(BaseModel):
     market_definitions: list[MarketDefinition] = Field(default_factory=list)
     redis: RedisSettings
     postgres: PostgresSettings | None = None
-    # --- ADDED: Field for OCI settings ---
     oci: OCISettings | None = None
     analyzer: AnalyzerSettings | None = None
     tradable: list[dict] = []
