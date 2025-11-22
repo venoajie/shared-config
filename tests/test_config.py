@@ -88,7 +88,8 @@ def test_deribit_secrets_file_override(clean_env):
 
 def test_postgres_config_for_db_service(clean_env):
     """Test that DB services fail without a password."""
-    os.environ["SERVICE_NAME"] = "executor"  # Requires DB
+    # FIX: Use 'analyzer' instead of 'executor' to avoid triggering OCI check
+    os.environ["SERVICE_NAME"] = "analyzer"
     os.environ["POSTGRES_USER"] = "user"
     os.environ["POSTGRES_DB"] = "db"
 
@@ -135,12 +136,7 @@ def test_oci_tns_parsing():
     assert c1.dsn == "my_alias"
 
     # 2. Full URL
-    c2 = OciConfig(
-        dsn="oracle+oracledb://user:pass@my_alias_high?param=1",
-        user="u",
-        password="p",
-        wallet_dir="w",
-    )
+    c2 = OciConfig(dsn="oracle+oracledb://user:pass@my_alias_high?param=1", user="u", password="p", wallet_dir="w")
     assert c2.dsn == "my_alias_high"
 
     # 3. Just @ split
@@ -170,13 +166,12 @@ def test_market_map_computation(clean_env):
     # We need to inject market definitions via toml load or manually
     mock_toml = {
         "market_definitions": [
-            # We mock the data structure that tomli would return.
-            # Pydantic validation happens inside load_settings -> AppSettings.
+            # FIX: Use 'futures' (plural) to match literal type
             {
                 "market_id": "btc-perp",
                 "exchange": "deribit",
                 "symbol": "BTC-PERP",
-                "market_type": "future",
+                "market_type": "futures",
                 "base_asset": "BTC",
                 "quote_asset": "USD",
                 "tick_size": 0.5,
