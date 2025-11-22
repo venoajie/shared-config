@@ -295,3 +295,5 @@ def load_settings() -> AppSettings:
         f"in '{final_settings.environment}' environment."
     )
     return final_settings
+
+settings = load_settings()
