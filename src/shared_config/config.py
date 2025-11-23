@@ -238,7 +238,6 @@ def load_settings() -> AppSettings:
         if deribit_client_secret:
             exchanges_data["deribit"]["client_secret"] = deribit_client_secret
 
-
     # 1. Load the BASE business logic that applies to all services.
     base_data = {}
     base_config_path = Path(__file__).parent / "business_logic.toml"
@@ -273,7 +272,7 @@ def load_settings() -> AppSettings:
             "password": raw_env.REDIS_PASSWORD,
         },
         "analyzer": {},  # Force creation with defaults
-        **toml_data, # The merged TOML data is injected here
+        **toml_data,  # The merged TOML data is injected here
     }
 
     # --- Use the helper function for Postgres password ---
@@ -312,5 +311,6 @@ def load_settings() -> AppSettings:
         f"in '{final_settings.environment}' environment."
     )
     return final_settings
+
 
 settings = load_settings()
