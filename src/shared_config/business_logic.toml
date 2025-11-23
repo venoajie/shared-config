@@ -2,15 +2,9 @@
 
 # Defines the symbols that are part of the core business strategy.
 # Consumed by: Janitor, Receiver
-[[tradable]]
-spot = [ "BTC", "ETH" ]
 
-[[public_symbols]]
-symbol = "BTCUSDT"
-market_type = "spot"
-
-# A list of all available strategy labels.
-# Consumed by: Executor
+[business]
+# A list of all available strategy labels that can be assigned to orders.
 strategy_labels = [
     "hedgingSpot",
     "futureSpread",
@@ -19,8 +13,16 @@ strategy_labels = [
     "custom",
 ]
 
-# Defines risk parameters.
-# Consumed by: Executor
+# Defines the symbols that are part of the core business strategy.
+[[business.tradable]]
+spot = [ "BTC", "ETH" ]
+
+# Defines the symbols that the 'binance' receiver client will initially
+# subscribe to for public trade data upon startup.
+[[business.public_symbols]]
+symbol = "BTCUSDT"
+market_type = "spot"
+
 
 # Defines risk parameters for the 'executor' based on a perceived market state.
 [[market_situation]]
@@ -195,3 +197,6 @@ sub_account_max_open_orders = {per_instrument = 50, total = 200}
 
 [[strategies.general]]
 sub_account_max_open_orders = {per_instrument = 50, total = 200}
+
+# (Note: `market_situation` and `strategies` are already "table arrays" 
+# so they do not need to be nested under `[business]`)*
