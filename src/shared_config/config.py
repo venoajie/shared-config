@@ -184,7 +184,8 @@ class AppSettings(BaseModel):
 class RawEnvSettings(BaseSettings):
     SERVICE_NAME: str = "unknown"
     ENVIRONMENT: str = "development"
-    STRATEGY_CONFIG_PATH: str = str(Path(__file__).parent / "strategies.toml")
+    # REMOVED: STRATEGY_CONFIG_PATH no longer exists.
+    # STRATEGY_CONFIG_PATH: str = str(Path(__file__).parent / "strategies.toml")
     REDIS_URL: str = "redis://localhost:6379"
     REDIS_DB: int = 0
     REDIS_PASSWORD: str | None = None
@@ -237,18 +238,34 @@ def load_settings() -> AppSettings:
         if deribit_client_secret:
             exchanges_data["deribit"]["client_secret"] = deribit_client_secret
 
-    toml_data = {}
+
+    # 1. Load the BASE business logic that applies to all services.
+    base_data = {}
+    base_config_path = Path(__file__).parent / "business_logic.toml"
     try:
-        with open(raw_env.STRATEGY_CONFIG_PATH, "rb") as f:
-            toml_data = tomli.load(f)
-        log.info(f"Successfully loaded strategy config from {raw_env.STRATEGY_CONFIG_PATH}")
-    except (FileNotFoundError, AttributeError):
-        log.warning(f"Strategy config file not found at {raw_env.STRATEGY_CONFIG_PATH}. Skipping.")
+        with open(base_config_path, "rb") as f:
+            base_data = tomli.load(f)
+        log.info(f"Successfully loaded base config from {base_config_path}")
+    except FileNotFoundError:
+        log.warning(f"Base business logic config not found at {base_config_path}. This may be normal.")
+
+    # 2. Load the SERVICE-SPECIFIC configuration.
+    service_data = {}
+    service_config_path = Path(__file__).parent / f"{raw_env.SERVICE_NAME}.toml"
+    try:
+        with open(service_config_path, "rb") as f:
+            service_data = tomli.load(f)
+        log.info(f"Successfully loaded service-specific config from {service_config_path}")
+    except FileNotFoundError:
+        log.info(f"No service-specific config found at {service_config_path}. This may be normal.")
+
+    # 3. Merge the configurations. Service-specific values will override base values.
+    toml_data = {**base_data, **service_data}
 
     final_data = {
         "service_name": raw_env.SERVICE_NAME,
         "environment": raw_env.ENVIRONMENT,
-        "strategy_config_path": raw_env.STRATEGY_CONFIG_PATH,
+        # REMOVED: "strategy_config_path": raw_env.STRATEGY_CONFIG_PATH,
         "exchanges": exchanges_data,
         "redis": {
             "url": raw_env.REDIS_URL,
@@ -256,7 +273,7 @@ def load_settings() -> AppSettings:
             "password": raw_env.REDIS_PASSWORD,
         },
         "analyzer": {},  # Force creation with defaults
-        **toml_data,
+        **toml_data, # The merged TOML data is injected here
     }
 
     # --- Use the helper function for Postgres password ---
