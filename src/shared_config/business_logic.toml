@@ -1,9 +1,8 @@
 # src/shared_config/business_logic.toml
 
 # Defines the symbols that are part of the core business strategy.
-# Consumed by: Janitor, Receiver
 
-[business]
+# Consumed by: Janitor, Receiver
 # A list of all available strategy labels that can be assigned to orders.
 strategy_labels = [
     "hedgingSpot",
@@ -14,12 +13,12 @@ strategy_labels = [
 ]
 
 # Defines the symbols that are part of the core business strategy.
-[[business.tradable]]
+[[tradable]]
 spot = [ "BTC", "ETH" ]
 
 # Defines the symbols that the 'binance' receiver client will initially
 # subscribe to for public trade data upon startup.
-[[business.public_symbols]]
+[[public_symbols]]
 symbol = "BTCUSDT"
 market_type = "spot"
 
@@ -197,6 +196,3 @@ sub_account_max_open_orders = {per_instrument = 50, total = 200}
 
 [[strategies.general]]
 sub_account_max_open_orders = {per_instrument = 50, total = 200}
-
-# (Note: `market_situation` and `strategies` are already "table arrays" 
-# so they do not need to be nested under `[business]`)*
