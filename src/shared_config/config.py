@@ -129,7 +129,6 @@ class BackfillSettings(BaseModel):
 class AppSettings(BaseModel):
     service_name: str
     environment: str
-    strategy_config_path: str
     exchanges: dict[str, ExchangeSettings] = Field(default_factory=dict)
     market_definitions: list[MarketDefinition] = Field(default_factory=list)
     redis: RedisSettings
