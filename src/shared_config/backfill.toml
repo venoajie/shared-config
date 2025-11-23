@@ -1,0 +1,19 @@
+
+# src/shared_config/backfill.toml
+
+[backfill]
+start_date = "2025-07-01"
+resolutions = ["1", "5", "15", "60", "1D"]
+bootstrap_target_candles = 6000
+worker_count = 4
+ohlc_backfill_whitelist = [
+    "BTC-PERPETUAL",
+    "ETH-PERPETUAL",
+    "BTCUSDT",
+    "ETHUSDT"
+]
+
+[backfill.public_trades]
+enabled = false
+lookback_days = 7
+whitelist = [ "BTCUSDT", "ETHUSDT", "SOLUSDT" ]

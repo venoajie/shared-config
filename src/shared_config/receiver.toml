@@ -1,0 +1,20 @@
+
+# src/shared_config/receiver.toml
+
+# This section configures the real-time data ingestion clients.
+# Each entry launches a dedicated WebSocket client within the 'receiver' service.
+[[market_definitions]]
+market_id = "deribit_inverse"
+exchange = "deribit"
+market_type = "inverse_futures"
+mode = "full"
+
+[[market_definitions]]
+market_id = "binance_spot"
+exchange = "binance"
+market_type = "spot"
+mode = "full"
+
+[realtime]
+# The Redis channel used by the 'binance' receiver to dynamically manage subscriptions.
+binance_subscription_control_channel = "control:binance:subscriptions"

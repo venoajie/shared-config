@@ -1,0 +1,197 @@
+# src/shared_config/business_logic.toml
+
+# Defines the symbols that are part of the core business strategy.
+# Consumed by: Janitor, Receiver
+[[tradable]]
+spot = [ "BTC", "ETH" ]
+
+[[public_symbols]]
+symbol = "BTCUSDT"
+market_type = "spot"
+
+# A list of all available strategy labels.
+# Consumed by: Executor
+strategy_labels = [
+    "hedgingSpot",
+    "futureSpread",
+    "comboAuto",
+    "scalping",
+    "custom",
+]
+
+# Defines risk parameters.
+# Consumed by: Executor
+
+# Defines risk parameters for the 'executor' based on a perceived market state.
+[[market_situation]]
+market_situation = "STRONG_BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "WEAK_BULLISH"
+hedging_ratio = 0
+sec_cool_down = 0
+sec_outstanding = 0
+max_order = 0
+pct_order = 0
+
+[[market_situation]]
+market_situation = "NEUTRAL"
+hedging_ratio = 80
+sec_cool_down = 60
+sec_outstanding = 300
+max_order = 1
+pct_order = 5
+
+[[market_situation]]
+market_situation = "WEAK_BEARISH"
+hedging_ratio = 100
+sec_cool_down = 60
+sec_outstanding = 180
+max_order = 1
+pct_order = 10
+
+[[market_situation]]
+market_situation = "BEARISH"
+hedging_ratio = 120
+sec_cool_down = 30
+sec_outstanding = 60
+max_order = 2
+pct_order = 10
+
+[[market_situation]]
+market_situation = "STRONG_BEARISH"
+hedging_ratio = 150
+sec_cool_down = 30
+sec_outstanding = 30
+max_order = 3
+pct_order = 20
+
+# Defines the detailed parameters for trading strategies.
+# Consumed by: Executor
+
+[[strategies]]
+strategy_label = "hedgingSpot"
+is_active = true
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = false
+side = "sell"
+take_profit_pct = 0
+settlement_period = ["perpetual", "week"]
+weighted_factor = {minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+sec_cool_down= 240
+max_leverage= 1
+max_margin_utilization_pct = 0.80 # Or another value between 0.0 and 1.0
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= true
+reduce_only= false
+
+[[strategies]]
+strategy_label = "scalping"
+is_active = false
+contribute_to_hedging = false
+cancellable = true
+non_checked_for_size_label_consistency = false
+side = "sell"
+take_profit_pct = 0
+settlement_period = ["perpetual", "week"]
+weighted_factor = {minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+sec_cool_down= 240
+max_leverage= 1
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= true
+reduce_only= false
+
+[[strategies]]
+strategy_label = "futureSpread"
+is_active = true
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+delta_price_pct= 0.1
+monthly_profit_pct= 0.5
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= false
+reduce_only= true
+
+[[strategies]]
+strategy_label = "futureSpreadAuto"
+is_active = false
+contribute_to_hedging = true
+cancellable = false
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 10
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+delta_price_pct= 0.1
+monthly_profit_pct= 0.5
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+mode_full= false
+reduce_only= true
+
+[[strategies]]
+strategy_label = "comboAuto"
+is_active = false
+contribute_to_hedging = true
+cancellable = true
+non_checked_for_size_label_consistency = true
+side = "sell"
+take_profit_pct = 0
+settlement_period =  ["week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = 3
+waiting_minute_before_relabelling = 15
+sec_cool_down= 240
+max_leverage= 10
+monthly_profit_pct= 0.5
+delta_price_pct= 0.1
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+
+[[strategies]]
+strategy_label = "custom"
+is_active = false
+contribute_to_hedging = false
+cancellable = false
+non_checked_for_size_label_consistency = true
+side = []
+take_profit_pct = 0
+settlement_period = ["perpetual", "week", "month"]
+weighted_factor = { minimum = 1, medium = 5, extreme=10, flash_crash= 20}
+sec_outstanding = []
+sec_cool_down= 240
+max_leverage= 1
+delta_price_pct= 0.005
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
+
+[[strategies.general]]
+sub_account_max_open_orders = {per_instrument = 50, total = 200}
