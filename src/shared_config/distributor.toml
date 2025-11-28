@@ -1,5 +1,5 @@
 # src/shared_config/distributor.toml
 
-[distributor]
+[services.distributor]
 public_trades_retention_period = "1 hour"
 pruning_interval_s = 600

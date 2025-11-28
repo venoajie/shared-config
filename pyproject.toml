@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 # The 'venoajie-' prefix was an attempt to work with the GitHub Packages
 # registry, which is no longer the target.
 name = "shared-config"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     { name = "Trading Systems Team", email = "ven.ajie@protonmail.com" },
 ]

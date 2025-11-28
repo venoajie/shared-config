@@ -1,0 +1,55 @@
+
+# src/shared_config/executor.toml
+
+# This file is the single source of truth for the executor service's business logic.
+
+[risk_management]
+max_order_notional_usd = 50000.0
+max_position_notional_usd = 500000.0
+price_deviation_tolerance_pct = 0.10
+equity_dust_threshold = 0.005
+
+[services.executor.reconciliation]
+interval_seconds = 60
+initial_delay_seconds = 10
+
+# A dictionary of regimes, where the key matches the MarketRegime Enum
+[regime_parameters]
+    [regime_parameters.BULLISH]
+    hedge_ratio = 0.6
+    execution_horizon_minutes = 60
+    order_type = "limit"
+    time_in_force = "good_till_time"
+    ttl_seconds = 180
+
+    [regime_parameters.NEUTRAL]
+    hedge_ratio = 0.8
+    execution_horizon_minutes = 60
+    order_type = "limit"
+    time_in_force = "good_till_time"
+    ttl_seconds = 180
+
+    [regime_parameters.BEARISH]
+    hedge_ratio = 0.8
+    execution_horizon_minutes = 15
+    order_type = "limit"
+    time_in_force = "good_till_time"
+    ttl_seconds = 60
+
+    [regime_parameters.CRASH]
+    hedge_ratio = 1.0
+    execution_horizon_minutes = 1
+    order_type = "market"
+    time_in_force = "good_till_cancelled"
+    ttl_seconds = 0
+
+# A dictionary of strategies, where the key matches the strategy_name property
+[strategies]
+    [strategies.usdSynthetic]
+    drift_threshold_contracts = 5
+    twap_clip_pct = 0.10
+
+# This is the base business logic, moved from the old file
+tradable = [
+    { spot = [ "BTC", "ETH" ] }
+]

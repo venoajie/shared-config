@@ -1,7 +1,7 @@
 
 # src/shared_config/backfill.toml
 
-[backfill]
+[services.backfill]
 start_date = "2025-07-01"
 resolutions = ["1", "5", "15", "60", "1D"]
 bootstrap_target_candles = 6000
@@ -13,7 +13,7 @@ ohlc_backfill_whitelist = [
     "ETHUSDT"
 ]
 
-[backfill.public_trades]
+[services.backfill.public_trades]
 enabled = false
 lookback_days = 7
 whitelist = [ "BTCUSDT", "ETHUSDT", "SOLUSDT" ]

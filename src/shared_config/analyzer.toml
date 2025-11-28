@@ -1,10 +1,10 @@
 # src/shared_config/analyzer.toml
 
-[analyzer]
-consumer_name = "analyzer-1"
-group_name = "analyzer_group"
+[services.analyzer]
 instrument_sync_interval_s = 3600
 anomaly_check_interval_s = 15
+consumer_name = "analyzer-1"
+group_name = "analyzer_group"
 volume_window_recent_s = 60
 volume_window_historical_s = 3600
 anomaly_threshold_multiplier = 5.0
